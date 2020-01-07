@@ -5,7 +5,7 @@
 ###
 
 # Prep Container for usage
-function init {
+function init() {
     # Create the storage/cache directories
     if [ ! -d /data/storage ]; then
         mkdir -p /data/storage
@@ -32,7 +32,7 @@ function init {
 }
 
 # Runs the initial configuration on every startup
-function startServer {
+function startServer() {
 
     # Initial setup
     if [ ! -e /data/pterodactyl.conf ]; then
@@ -40,15 +40,15 @@ function startServer {
 
         # Generate base template
         touch /data/pterodactyl.conf
-        echo "##" > /data/pterodactyl.conf
-        echo "# Generated on:" $(date +"%B %d %Y, %H:%M:%S") >> /data/pterodactyl.conf
-        echo "# This file was generated on first start and contains " >> /data/pterodactyl.conf
-        echo "# the key for sensitive information. All panel configuration " >> /data/pterodactyl.conf
-        echo "# can be done here using the normal method (NGINX not included!)," >> /data/pterodactyl.conf
-        echo "# or using Docker's environment variables parameter." >> /data/pterodactyl.conf
-        echo "##" >> /data/pterodactyl.conf
-        echo "" >> /data/pterodactyl.conf
-        echo "APP_KEY=SomeRandomString3232RandomString" >> /data/pterodactyl.conf
+        echo "##" >/data/pterodactyl.conf
+        echo "# Generated on:" $(date +"%B %d %Y, %H:%M:%S") >>/data/pterodactyl.conf
+        echo "# This file was generated on first start and contains " >>/data/pterodactyl.conf
+        echo "# the key for sensitive information. All panel configuration " >>/data/pterodactyl.conf
+        echo "# can be done here using the normal method (NGINX not included!)," >>/data/pterodactyl.conf
+        echo "# or using Docker's environment variables parameter." >>/data/pterodactyl.conf
+        echo "##" >>/data/pterodactyl.conf
+        echo "" >>/data/pterodactyl.conf
+        echo "APP_KEY=SomeRandomString3232RandomString" >>/data/pterodactyl.conf
 
         sleep 5
 
@@ -68,23 +68,27 @@ function startServer {
     if [[ "${STARTUP_TIMEOUT}" -gt "0" ]]; then
         echo "Starting Pterodactyl ${PANEL_VERSION} in ${STARTUP_TIMEOUT} seconds..."
         sleep ${STARTUP_TIMEOUT}
-    else 
+    else
         echo "Starting Pterodactyl ${PANEL_VERSION}..."
     fi
 
-    if [ "${SSL}" == "true" ]; then
-        envsubst '${SSL_CERT},${SSL_CERT_KEY}' \
-        < /etc/nginx/templates/https.conf > /etc/nginx/conf.d/default.conf
-    else
-        echo "[Warning] Disabling HTTPS"
-        cat /etc/nginx/templates/http.conf > /etc/nginx/conf.d/default.conf
-    fi
+    # if [ "${SSL}" == "true" ]; then
+    #     envsubst '${SSL_CERT},${SSL_CERT_KEY}' \
+    #     < /etc/nginx/templates/https.conf > /etc/nginx/conf.d/default.conf
+
+    # else
+    #     echo "[Warning] Disabling HTTPS"
+    #     cat /etc/nginx/templates/http.conf > /etc/nginx/conf.d/default.conf
+    # fi
+
+    # Since we always run the panel behing Traefik(or another reverse proxy) just copy the http.conf
+    cat /etc/nginx/templates/http.conf >/etc/nginx/conf.d/default.conf
 
     # Determine if workers should be enabled or not
     if [ "${DISABLE_WORKERS}" != "true" ]; then
         /usr/sbin/crond -f -l 0 &
         php /var/www/html/artisan queue:work database --queue=high,standard,low --sleep=3 --tries=3 &
-    else 
+    else
         echo "[Warning] Disabling Workers (pteroq & cron); It is recommended to keep these enabled unless you know what you are doing."
     fi
 
@@ -98,10 +102,10 @@ function startServer {
 init
 
 case "${1}" in
-    p:start)
-        startServer
-        ;;
-    *)
-        exec ${@}
-        ;;
+p:start)
+    startServer
+    ;;
+*)
+    exec ${@}
+    ;;
 esac

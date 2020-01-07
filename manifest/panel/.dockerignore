@@ -1,0 +1,4 @@
+Dockerfile
+
+# Ignore nginx https conf file
+./etc/nginx/templates/https.conf
