@@ -1,4 +1,6 @@
-FROM node:8-alpine
+ARG ALPINE_VERSION=${ALPINE_VERSION}
+
+FROM node:13.5.0-alpine${ALPINE_VERSION}
 
 LABEL maintainer="MrFlutters"
 

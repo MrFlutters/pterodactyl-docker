@@ -1,5 +1,7 @@
+ARG ALPINE_VERSION=${ALPINE_VERSION}
+
 # Build sftp-server artifact
-FROM golang:alpine3.10 as BUILDER
+FROM golang:alpine${ALPINE_VERSION} as BUILDER
 RUN apk add git
 ARG VERSION
 ENV SFTP_VERSION=${VERSION}
@@ -8,7 +10,8 @@ WORKDIR /app
 RUN GOOS=linux go build -o /app/build/sftp-server .
 
 # Build runtime Image
-FROM alpine:latest
+
+FROM alpine:${ALPINE_VERSION}
 
 LABEL maintainer="MrFlutters"
 

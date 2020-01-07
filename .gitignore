@@ -5,3 +5,4 @@ ssl/
 letsencrypt/
 .env
 docker-compose.override.yml
+manifest/logs/*.log
